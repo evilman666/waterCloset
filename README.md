@@ -11,6 +11,23 @@
 ## Compiling
 This game requires SDL 2.0 (along with SDL Mixer, SDL Image, and SDL TTF). Compile by running make and then ./waterCloset to run the game.
 
+### macOS
+Install the Xcode Command Line Tools and the SDL 2 libraries (via [Homebrew](https://brew.sh)):
+
+```sh
+xcode-select --install
+brew install sdl2 sdl2_mixer sdl2_image sdl2_ttf
+```
+
+Then build and run from the repository root (the game looks for its data files in the current directory):
+
+```sh
+make
+./waterCloset
+```
+
+The makefile detects macOS automatically. Note that `gcc` on macOS is Apple's clang. `make install` defaults to a `/usr/local` prefix, with game data installed to `/opt/waterCloset` (both need `sudo`).
+
 ## Controls
 * [A] - Move left
 * [D] - Move right
@@ -20,7 +37,7 @@ This game requires SDL 2.0 (along with SDL Mixer, SDL Image, and SDL TTF). Compi
 * [Backspace] - Restart stage
 
 ## Save data
-Save game data is stored in ~/.local/share/waterCloset.
+Save game data is stored in ~/.local/share/waterCloset (on macOS too). If that folder can't be created, the game saves to the current directory.
 
 ## Extended config
 Some options won't be found in the main game UI, but can be accessed and tweaked the game's ~/.local/share/config.json file.

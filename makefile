@@ -1,8 +1,15 @@
 PROG = waterCloset
 MAP_PROG = mapEditor
 
+UNAME_S := $(shell uname -s)
+
 CC = gcc
+ifeq ($(UNAME_S),Darwin)
+# /usr is read-only on macOS (System Integrity Protection)
+PREFIX ?= /usr/local
+else
 PREFIX ?= /usr
+endif
 BIN_DIR ?= $(PREFIX)/bin
 DATA_DIR ?= /opt/$(PROG)
 LOCALE_DIR = $(PREFIX)/share/locale
@@ -21,12 +28,21 @@ include common.mk
 GAME_OBJS += $(OUT)/src/plat/unix/unixInit.o
 MAP_OBJS += $(OUT)/src/plat/unix/unixInit.o
 
-NPROCS = $(shell grep -c 'processor' /proc/cpuinfo)
-MAKEFLAGS += -j$(NPROCS)
-
 CXXFLAGS += `sdl2-config --cflags` -DVERSION=$(VERSION) -DREVISION=$(REVISION) -DDATA_DIR=\"$(DATA_DIR)\"
-CXXFLAGS += -Wall -Wempty-body -Werror -Wstrict-prototypes -Werror=maybe-uninitialized -Warray-bounds
-CXXFLAGS += -g -lefence
+CXXFLAGS += -Wall -Wempty-body -Werror -Wstrict-prototypes -Warray-bounds
+CXXFLAGS += -g
+
+ifeq ($(UNAME_S),Darwin)
+# macOS: gcc is Apple clang, and SDL is installed via Homebrew (or MacPorts).
+# The sources include "SDL2/SDL.h", so add the parent of sdl2-config's include dir.
+NPROCS = $(shell sysctl -n hw.ncpu)
+CXXFLAGS += -I`sdl2-config --prefix`/include
+else
+NPROCS = $(shell grep -c 'processor' /proc/cpuinfo)
+CXXFLAGS += -Werror=maybe-uninitialized -lefence
+endif
+
+MAKEFLAGS += -j$(NPROCS)
 
 LDFLAGS += `sdl2-config --libs` -lSDL2_mixer -lSDL2_image -lSDL2_ttf -lm
 
